@@ -1,6 +1,7 @@
 package com.example.urbandictonaryapp.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -20,10 +21,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
+import static android.content.ContentValues.TAG;
+
 public class SearchWordViewModel extends AndroidViewModel {
 
     private MutableLiveData<List<Definition>> definitions = new MutableLiveData<>();
     private MutableLiveData<Boolean> showProgressBar = new MutableLiveData<>();
+    private MutableLiveData<String> error = new MutableLiveData<>();
 
     private Repository repo = Repository.getInstance();
     private CompositeDisposable disposable = new CompositeDisposable();
@@ -52,6 +56,7 @@ public class SearchWordViewModel extends AndroidViewModel {
                     @Override
                     public void onError(Throwable e) {
                         // Something went wrong
+                        error.postValue(e.getMessage());
                     }
 
                     @Override
@@ -62,45 +67,18 @@ public class SearchWordViewModel extends AndroidViewModel {
                 });
     }
 
-    public void getDefinitionsObservable2(String term) {
-        Disposable defDisposable = repo.getDefinitions(term)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<UrbanResponse>() {
-                    @Override
-                    public void accept(UrbanResponse urbanResponse) throws Exception {
-
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-
-                    }
-                });
-        disposable.add(defDisposable);
-    }
-
-    public void getDefinitionsObservable2Lamda(String term) {
-        showProgressBar.setValue(true);
-        Disposable defDisposable = repo.getDefinitions(term)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(urbanResponse -> {
-                    definitions.setValue(urbanResponse.getList());
-                    showProgressBar.setValue(false);
-
-                }, throwable -> {
-                    showProgressBar.setValue(false);
-                });
-        disposable.add(defDisposable);
-    }
 
     public LiveData<List<Definition>> getDefinitions() {
+        Log.d(TAG, "getDefinitions: " + definitions);
         return definitions;
     }
 
     public LiveData<Boolean> getShowProgressBar() {
         return showProgressBar;
+    }
+
+    public LiveData<String> getError() {
+        return error;
     }
 
     @Override

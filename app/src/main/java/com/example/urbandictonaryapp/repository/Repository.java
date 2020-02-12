@@ -4,6 +4,7 @@ import com.example.urbandictonaryapp.model.UrbanResponse;
 import com.example.urbandictonaryapp.repository.remote.ServiceInstance;
 
 import io.reactivex.Observable;
+import retrofit2.Retrofit;
 
 public class Repository {
 
